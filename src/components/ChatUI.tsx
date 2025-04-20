@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -5,13 +6,14 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
-import { Send, Phone, MessageCircle, AlertCircle } from "lucide-react";
+import { Send, Phone, MessageCircle, AlertCircle, Info } from "lucide-react";
 
 interface ChatMessage {
   id: string;
   text: string;
   sender: "user" | "bot" | "counselor";
   timestamp: Date;
+  usingFallback?: boolean;
 }
 
 interface ChatUIProps {
@@ -64,6 +66,7 @@ export function ChatUI({ sessionId }: ChatUIProps) {
           text: data.response,
           sender: "bot",
           timestamp: new Date(),
+          usingFallback: data.usingFallback
         };
         setMessages(prevMessages => [...prevMessages, botMessage]);
       }
@@ -78,22 +81,6 @@ export function ChatUI({ sessionId }: ChatUIProps) {
       setMessages(prevMessages => [...prevMessages, errorMessage]);
     } finally {
       setIsTyping(false);
-    }
-  };
-  
-  const generateBotResponse = (userMessage: string): string => {
-    const userMessageLower = userMessage.toLowerCase();
-    
-    if (userMessageLower.includes("hello") || userMessageLower.includes("hi")) {
-      return "Hello! How are you feeling today?";
-    } else if (userMessageLower.includes("sad") || userMessageLower.includes("depressed")) {
-      return "I'm sorry to hear you're feeling down. Would you like to talk about what's bothering you?";
-    } else if (userMessageLower.includes("stress") || userMessageLower.includes("anxiety")) {
-      return "It sounds like you're experiencing some stress. Have you tried any relaxation techniques recently?";
-    } else if (userMessageLower.includes("thank")) {
-      return "You're welcome! I'm here to support you.";
-    } else {
-      return "I'm here to listen and help. Can you tell me more about how you're feeling?";
     }
   };
   
@@ -219,8 +206,13 @@ export function ChatUI({ sessionId }: ChatUIProps) {
                 }`}
               >
                 {msg.sender !== "user" && (
-                  <p className="text-xs font-medium text-gray-700 mb-1">
+                  <p className="text-xs font-medium text-gray-700 mb-1 flex items-center gap-1">
                     {msg.sender === "counselor" ? "Counselor" : "Kiran AI"}
+                    {msg.usingFallback && (
+                      <span className="inline-flex items-center text-orange-500" title="Using backup system">
+                        <Info className="h-3 w-3" />
+                      </span>
+                    )}
                   </p>
                 )}
                 <p>{msg.text}</p>
