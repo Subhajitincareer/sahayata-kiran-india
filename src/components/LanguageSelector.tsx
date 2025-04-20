@@ -6,21 +6,20 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useState } from "react";
+import { Languages } from "lucide-react";
+import { useI18n, Language } from "@/lib/i18n/i18nContext";
 
 const languages = [
   { code: "en", name: "English" },
   { code: "hi", name: "हिन्दी (Hindi)" },
-  { code: "ta", name: "தமிழ் (Tamil)" },
-  { code: "te", name: "తెలుగు (Telugu)" },
-  { code: "bn", name: "বাংলা (Bengali)" },
-  { code: "ml", name: "മലയാളം (Malayalam)" },
-  { code: "kn", name: "ಕನ್ನಡ (Kannada)" },
-  { code: "mr", name: "मराठी (Marathi)" },
 ];
 
 export function LanguageSelector() {
-  const [currentLanguage, setCurrentLanguage] = useState("English");
+  const { language, setLanguage } = useI18n();
+
+  const handleLanguageChange = (code: Language) => {
+    setLanguage(code);
+  };
 
   return (
     <div className="fixed bottom-5 right-5 z-50">
@@ -31,20 +30,18 @@ export function LanguageSelector() {
             size="sm"
             className="bg-white shadow-md border-gray-200 px-4 flex items-center gap-2"
           >
-            <span className="h-4 w-4 rounded-full bg-sahayata-blue flex items-center justify-center text-[10px] text-white">
-              अ
-            </span>
-            <span>{currentLanguage}</span>
+            <Languages className="h-4 w-4" />
+            <span>{languages.find(l => l.code === language)?.name || "English"}</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48">
-          {languages.map((language) => (
+          {languages.map((lang) => (
             <DropdownMenuItem
-              key={language.code}
-              onClick={() => setCurrentLanguage(language.name)}
+              key={lang.code}
+              onClick={() => handleLanguageChange(lang.code as Language)}
               className="cursor-pointer"
             >
-              {language.name}
+              {lang.name}
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>
