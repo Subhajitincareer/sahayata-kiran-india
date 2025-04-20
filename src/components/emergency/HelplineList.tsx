@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { Phone, MessageCircle } from "lucide-react";
+import { Phone, MessageCircle, Shield } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
 type HelplineListProps = {
