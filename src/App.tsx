@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import SelfAssessment from "./pages/SelfAssessment";
 import Chat from "./pages/Chat";
 import NotFound from "./pages/NotFound";
+import { EmergencyHelpButton } from "./components/EmergencyHelpButton";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,7 @@ const App = () => (
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <EmergencyHelpButton />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
