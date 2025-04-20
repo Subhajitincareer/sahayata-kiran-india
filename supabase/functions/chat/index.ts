@@ -7,6 +7,13 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+// Crisis keywords to check for in user messages
+const crisisKeywords = [
+  "suicide", "kill myself", "end my life", "self harm",
+  "want to die", "hurt myself", "no reason to live",
+  "आत्महत्या", "खुद को मारना", "जीवन समाप्त", "मरना चाहता", "मरना चाहती"
+];
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
@@ -15,10 +22,24 @@ serve(async (req) => {
   try {
     const { message, mood } = await req.json()
 
+    // Check for crisis indicators in the message
+    const containsCrisisWord = crisisKeywords.some(keyword => 
+      message.toLowerCase().includes(keyword.toLowerCase())
+    )
+
     // System message that includes context about being a mental health support chatbot
-    const systemMessage = `You are Kiran, an empathetic mental health support assistant focused on helping students in India. 
+    let systemMessage = `You are Kiran, an empathetic mental health support assistant focused on helping students in India. 
     The user's current mood is: ${mood}. Respond with understanding and care, but if you detect signs of crisis, 
     recommend professional help. Keep responses concise and supportive.`
+
+    // If crisis is detected, add special instructions for the AI
+    if (containsCrisisWord) {
+      systemMessage += ` 
+      IMPORTANT: The user has expressed content that may indicate they are in crisis. 
+      Respond with extra compassion, validate their feelings, and strongly encourage them to seek immediate help.
+      Remind them of the emergency resources available through the "Emergency Help" button.
+      Do not minimize their feelings or suggest that things will simply get better.`
+    }
 
     try {
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -55,16 +76,6 @@ serve(async (req) => {
       
       const aiResponse = data.choices[0].message.content
 
-      // Crisis keywords to check for in the user's message
-      const crisisKeywords = [
-        "suicide", "kill myself", "end my life", "self harm",
-        "want to die", "hurt myself", "no reason to live"
-      ]
-
-      const containsCrisisWord = crisisKeywords.some(keyword => 
-        message.toLowerCase().includes(keyword.toLowerCase())
-      )
-
       return new Response(
         JSON.stringify({
           response: aiResponse,
@@ -78,18 +89,8 @@ serve(async (req) => {
       console.error('OpenAI API Error:', openAiError);
       
       // Provide a fallback response when OpenAI fails
-      let fallbackResponse = generateFallbackResponse(message, mood);
+      let fallbackResponse = generateFallbackResponse(message, mood, containsCrisisWord);
       
-      // Also check for crisis keywords in fallback mode
-      const crisisKeywords = [
-        "suicide", "kill myself", "end my life", "self harm",
-        "want to die", "hurt myself", "no reason to live"
-      ]
-
-      const containsCrisisWord = crisisKeywords.some(keyword => 
-        message.toLowerCase().includes(keyword.toLowerCase())
-      )
-
       return new Response(
         JSON.stringify({
           response: fallbackResponse,
@@ -114,9 +115,15 @@ serve(async (req) => {
 })
 
 // Fallback response generator function when OpenAI API is unavailable
-function generateFallbackResponse(userMessage: string, mood: string): string {
+function generateFallbackResponse(userMessage: string, mood: string, inCrisis: boolean): string {
   const userMessageLower = userMessage.toLowerCase();
   
+  // If crisis is detected, provide a crisis-focused response
+  if (inCrisis) {
+    return "I notice you may be going through a very difficult time. Your feelings are valid, and I want you to know that you're not alone. Please consider reaching out to a professional for immediate support using our emergency help resources. They are trained to help you through this moment.";
+  }
+  
+  // Standard fallback responses
   if (userMessageLower.includes("hello") || userMessageLower.includes("hi")) {
     return "Hello! I'm Kiran. How can I support you today?";
   } else if (userMessageLower.includes("sad") || userMessageLower.includes("depress")) {

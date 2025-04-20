@@ -7,6 +7,9 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { saveToLocalStorage, getFromLocalStorage } from "@/lib/storage";
 import { formatDate } from "@/lib/utils";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
+import { detectCrisis, getCrisisActions, getSupportiveMessage } from "@/lib/crisis-detection";
 
 export type MoodEntry = {
   id: string;
@@ -15,6 +18,7 @@ export type MoodEntry = {
   journal?: string;
   tags?: string[];
   timestamp: number;
+  crisisLevel?: "none" | "low" | "moderate" | "high";
 };
 
 export function MoodJournal() {
@@ -22,6 +26,7 @@ export function MoodJournal() {
   const [journal, setJournal] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [todaysEntry, setTodaysEntry] = useState<MoodEntry | null>(null);
+  const [crisisDetected, setCrisisDetected] = useState<"none" | "low" | "moderate" | "high">("none");
   
   const today = new Date().toISOString().split('T')[0];
   
@@ -33,6 +38,9 @@ export function MoodJournal() {
       setTodaysEntry(existingEntry);
       setMood(existingEntry.mood);
       setJournal(existingEntry.journal || "");
+      if (existingEntry.crisisLevel && existingEntry.crisisLevel !== "none") {
+        setCrisisDetected(existingEntry.crisisLevel);
+      }
     }
   }, [today]);
   
@@ -46,6 +54,35 @@ export function MoodJournal() {
     
     return () => clearTimeout(autosaveTimer);
   }, [journal, mood]);
+  
+  // Crisis detection in journal text
+  useEffect(() => {
+    if (journal && journal.trim() !== "") {
+      const { level } = detectCrisis(journal);
+      setCrisisDetected(level);
+      
+      // Show supportive message for moderate and high crisis levels
+      if (level === "moderate" || level === "high") {
+        const supportiveMessage = getSupportiveMessage(level);
+        if (supportiveMessage) {
+          toast({
+            title: "We're here for you",
+            description: supportiveMessage,
+            duration: 10000,
+          });
+        }
+        
+        // Automatically open emergency help panel for high crisis levels
+        if (level === "high") {
+          // Simulate clicking the emergency help button
+          const emergencyBtn = document.querySelector('[aria-label="Emergency Help"]') as HTMLButtonElement;
+          if (emergencyBtn) {
+            setTimeout(() => emergencyBtn.click(), 1000);
+          }
+        }
+      }
+    }
+  }, [journal]);
   
   const handleMoodSubmit = (selectedMood: string) => {
     setMood(selectedMood);
@@ -61,12 +98,16 @@ export function MoodJournal() {
       const entries = getFromLocalStorage("mood-entries") || [];
       const moodToSave = selectedMood || mood;
       
+      // Check for crisis content
+      const crisisResult = detectCrisis(journal);
+      
       const newEntry: MoodEntry = {
         id: todaysEntry?.id || crypto.randomUUID(),
         date: today,
         mood: moodToSave!,
         journal: journal.trim() || undefined,
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        crisisLevel: crisisResult.level
       };
       
       // Remove today's entry if it exists
@@ -112,6 +153,26 @@ export function MoodJournal() {
             <CardDescription>Write about your thoughts and feelings today</CardDescription>
           </CardHeader>
           <CardContent>
+            {(crisisDetected === "moderate" || crisisDetected === "high") && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>We notice you're going through a difficult time</AlertTitle>
+                <AlertDescription>
+                  {getSupportiveMessage(crisisDetected)}
+                </AlertDescription>
+              </Alert>
+            )}
+            
+            {crisisDetected === "low" && (
+              <Alert className="mb-4">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>We're here to support you</AlertTitle>
+                <AlertDescription>
+                  {getSupportiveMessage(crisisDetected)}
+                </AlertDescription>
+              </Alert>
+            )}
+            
             <Textarea
               placeholder="How was your day? What's on your mind?"
               className="min-h-[200px]"
