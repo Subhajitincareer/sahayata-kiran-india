@@ -37,7 +37,21 @@ serve(async (req) => {
       }),
     })
 
+    // Check if the response is successful before trying to parse it
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('OpenAI API error:', response.status, errorText);
+      throw new Error(`OpenAI API returned ${response.status}: ${errorText}`);
+    }
+
     const data = await response.json()
+    
+    // Add safety checks to ensure data has the expected structure
+    if (!data || !data.choices || !data.choices[0] || !data.choices[0].message) {
+      console.error('Unexpected OpenAI API response structure:', JSON.stringify(data));
+      throw new Error('Invalid response from OpenAI API');
+    }
+    
     const aiResponse = data.choices[0].message.content
 
     // Crisis keywords to check for in the user's message
