@@ -18,6 +18,9 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				poppins: ['Poppins', 'sans-serif'],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -51,6 +54,15 @@ export default {
 				card: {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
+				},
+				// Custom colors for Sahayata Kiran app
+				sahayata: {
+					blue: '#33C3F0',
+					purple: '#E5DEFF',
+					lightBlue: '#D3E4FD',
+					softGray: '#F1F0FB',
+					coolGray: '#aaadb0',
+					neutralGray: '#8E9196'
 				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
