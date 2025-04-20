@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import SelfAssessment from "./pages/SelfAssessment";
 import Chat from "./pages/Chat";
+import MoodTracker from "./pages/MoodTracker";
 import NotFound from "./pages/NotFound";
 import { EmergencyHelpButton } from "./components/EmergencyHelpButton";
 
@@ -22,6 +23,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/assessment" element={<SelfAssessment />} />
           <Route path="/chat" element={<Chat />} />
+          <Route path="/mood-tracker" element={<MoodTracker />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

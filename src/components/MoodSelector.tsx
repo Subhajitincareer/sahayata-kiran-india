@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -11,10 +11,18 @@ type Mood = {
 
 interface MoodSelectorProps {
   onSubmit: (mood: string) => void;
+  initialMood?: string;
 }
 
-export function MoodSelector({ onSubmit }: MoodSelectorProps) {
-  const [selectedMood, setSelectedMood] = useState<string | null>(null);
+export function MoodSelector({ onSubmit, initialMood }: MoodSelectorProps) {
+  const [selectedMood, setSelectedMood] = useState<string | null>(initialMood || null);
+  
+  // Update selectedMood if initialMood changes
+  useEffect(() => {
+    if (initialMood) {
+      setSelectedMood(initialMood);
+    }
+  }, [initialMood]);
   
   const moods: Mood[] = [
     { name: "Happy", emoji: "😊", color: "bg-green-100" },
@@ -34,15 +42,8 @@ export function MoodSelector({ onSubmit }: MoodSelectorProps) {
   };
 
   return (
-    <Card className="max-w-md mx-auto shadow-lg">
-      <CardHeader>
-        <CardTitle className="text-center">How are you feeling today?</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p className="text-sm text-gray-600 mb-4 text-center">
-          Select your current mood to help us better support you
-        </p>
-        
+    <Card className="shadow-sm border-none">
+      <CardContent className="pt-6">
         <div className="grid grid-cols-4 gap-4">
           {moods.map((mood) => (
             <div
@@ -62,9 +63,9 @@ export function MoodSelector({ onSubmit }: MoodSelectorProps) {
         <Button 
           onClick={handleSubmit} 
           disabled={!selectedMood} 
-          className="w-full bg-sahayata-blue"
+          className="w-full bg-sahayata-blue hover:bg-sahayata-blue/80"
         >
-          Start Chat
+          {initialMood ? "Update Mood" : "Save Mood"}
         </Button>
       </CardFooter>
     </Card>

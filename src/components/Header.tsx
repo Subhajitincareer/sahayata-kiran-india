@@ -1,7 +1,7 @@
 
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Phone, Heart, MessageCircle, BookOpen, Shield } from "lucide-react";
+import { Phone, Heart, MessageCircle, BookOpen, Shield, ChartLine } from "lucide-react";
 
 export function Header() {
   return (
@@ -16,6 +16,7 @@ export function Header() {
         <nav className="hidden md:flex items-center gap-6">
           <Link to="/" className="text-sm font-medium hover:text-sahayata-blue">Home</Link>
           <Link to="/assessment" className="text-sm font-medium hover:text-sahayata-blue">Self-Assessment</Link>
+          <Link to="/mood-tracker" className="text-sm font-medium hover:text-sahayata-blue">Mood Tracker</Link>
           <Link to="/resources" className="text-sm font-medium hover:text-sahayata-blue">Resources</Link>
           <Link to="/stories" className="text-sm font-medium hover:text-sahayata-blue">Stories</Link>
           <Link to="/forum" className="text-sm font-medium hover:text-sahayata-blue">Forum</Link>
