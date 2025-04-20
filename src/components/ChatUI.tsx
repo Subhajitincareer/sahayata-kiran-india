@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,7 +28,6 @@ export function ChatUI({ sessionId }: ChatUIProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   
-  // Add initial welcome message from bot
   useEffect(() => {
     const welcomeMessage: ChatMessage = {
       id: crypto.randomUUID(),
@@ -40,7 +38,6 @@ export function ChatUI({ sessionId }: ChatUIProps) {
     setMessages([welcomeMessage]);
   }, []);
 
-  // Scroll to bottom whenever messages change
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
@@ -49,28 +46,22 @@ export function ChatUI({ sessionId }: ChatUIProps) {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
   
-  // Send message to AI chatbot and get response
   const sendMessageToAI = async (message: string) => {
     try {
       setIsTyping(true);
       
-      // Detect crisis keywords
-      const crisisKeywords = ["suicide", "kill myself", "end my life", "die", "hurt myself", "self harm"];
-      const containsCrisisWord = crisisKeywords.some(keyword => 
-        message.toLowerCase().includes(keyword.toLowerCase())
-      );
-      
-      // Simulate AI response delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      if (containsCrisisWord) {
-        // Crisis detected
+      const { data, error } = await supabase.functions.invoke('chat', {
+        body: { message, mood: 'calm' }
+      });
+
+      if (error) throw error;
+
+      if (data.inCrisis) {
         handleCrisisDetected();
       } else {
-        // Regular chatbot response
         const botMessage: ChatMessage = {
           id: crypto.randomUUID(),
-          text: generateBotResponse(message),
+          text: data.response,
           sender: "bot",
           timestamp: new Date(),
         };
@@ -78,14 +69,19 @@ export function ChatUI({ sessionId }: ChatUIProps) {
       }
     } catch (error) {
       console.error("Error sending message to AI:", error);
+      const errorMessage: ChatMessage = {
+        id: crypto.randomUUID(),
+        text: "I apologize, but I'm having trouble responding right now. Please try again.",
+        sender: "bot",
+        timestamp: new Date(),
+      };
+      setMessages(prevMessages => [...prevMessages, errorMessage]);
     } finally {
       setIsTyping(false);
     }
   };
   
-  // Generate a simple response based on user input (to be replaced with real AI)
   const generateBotResponse = (userMessage: string): string => {
-    // This is a simple placeholder. In real implementation, this would be a call to your AI model
     const userMessageLower = userMessage.toLowerCase();
     
     if (userMessageLower.includes("hello") || userMessageLower.includes("hi")) {
@@ -101,9 +97,7 @@ export function ChatUI({ sessionId }: ChatUIProps) {
     }
   };
   
-  // Handle crisis detection
   const handleCrisisDetected = () => {
-    // Add crisis notification message
     const crisisMessage: ChatMessage = {
       id: crypto.randomUUID(),
       text: "I notice you may be in distress. I'm connecting you with a mental health professional who can better assist you.",
@@ -115,7 +109,6 @@ export function ChatUI({ sessionId }: ChatUIProps) {
     setInCrisisMode(true);
     setWaiting(true);
     
-    // Simulate counselor joining after a delay (in real app, this would be a notification to available counselors)
     setTimeout(() => {
       const counselorMessage: ChatMessage = {
         id: crypto.randomUUID(),
@@ -131,7 +124,6 @@ export function ChatUI({ sessionId }: ChatUIProps) {
   const handleSendMessage = () => {
     if (!newMessage.trim()) return;
     
-    // Add user message to chat
     const userMessage: ChatMessage = {
       id: crypto.randomUUID(),
       text: newMessage,
@@ -142,10 +134,8 @@ export function ChatUI({ sessionId }: ChatUIProps) {
     setMessages(prevMessages => [...prevMessages, userMessage]);
     setNewMessage("");
     
-    // Focus back on input
     inputRef.current?.focus();
     
-    // If in crisis mode, no need to send to AI
     if (!inCrisisMode) {
       sendMessageToAI(newMessage);
     }
@@ -159,7 +149,6 @@ export function ChatUI({ sessionId }: ChatUIProps) {
 
   return (
     <div className="flex flex-col h-[600px] border rounded-lg shadow-sm overflow-hidden bg-white">
-      {/* Chat header */}
       <div className="p-4 border-b bg-sahayata-softGray flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className={`h-3 w-3 rounded-full ${inCrisisMode ? "bg-red-500" : "bg-green-500"}`}></div>
@@ -213,7 +202,6 @@ export function ChatUI({ sessionId }: ChatUIProps) {
         </Sheet>
       </div>
       
-      {/* Chat messages */}
       <ScrollArea className="flex-1 p-4">
         <div className="space-y-4">
           {messages.map((msg) => (
@@ -243,7 +231,6 @@ export function ChatUI({ sessionId }: ChatUIProps) {
             </div>
           ))}
           
-          {/* Typing indicator */}
           {isTyping && (
             <div className="flex justify-start">
               <div className="bg-gray-100 px-4 py-3 rounded-lg text-sm rounded-bl-none">
@@ -256,7 +243,6 @@ export function ChatUI({ sessionId }: ChatUIProps) {
             </div>
           )}
           
-          {/* Crisis mode waiting message */}
           {inCrisisMode && waiting && (
             <div className="bg-yellow-100 text-yellow-800 p-3 rounded-lg text-sm text-center">
               Connecting you with a counselor. Please wait a moment...
@@ -267,7 +253,6 @@ export function ChatUI({ sessionId }: ChatUIProps) {
         </div>
       </ScrollArea>
       
-      {/* Input area */}
       <div className="p-3 border-t">
         <div className="flex gap-2">
           <Input
