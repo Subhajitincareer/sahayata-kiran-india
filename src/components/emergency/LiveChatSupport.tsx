@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { MessageCircle, Clock, User } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 type LiveChatSupportProps = {
   language: "english" | "hindi";
@@ -10,7 +11,8 @@ type LiveChatSupportProps = {
 
 export function LiveChatSupport({ language }: LiveChatSupportProps) {
   const [connecting, setConnecting] = useState(false);
-  
+  const navigate = useNavigate();
+
   const translations = {
     english: {
       title: "Live Chat Support",
@@ -44,12 +46,9 @@ export function LiveChatSupport({ language }: LiveChatSupportProps) {
 
   const handleConnect = () => {
     setConnecting(true);
-    // In a real app, this would connect to a live chat service
-    // For this demo, we'll just simulate connecting
     setTimeout(() => {
-      // Redirect to the chat page
-      window.location.href = "/chat?emergency=true";
-    }, 2000);
+      navigate("/chat", { state: { mode: "emergency" } });
+    }, 1000);
   };
   
   // In a real app, this would come from an API

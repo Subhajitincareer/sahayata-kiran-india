@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 
 export function Header() {
   const navigate = useNavigate();
-  
+
   const handleHelplineClick = () => {
     navigate("/chat", { state: { mode: "helpline" } });
   };
@@ -45,6 +45,7 @@ export function Header() {
             size="sm" 
             className="bg-sahayata-blue hover:bg-sahayata-blue/80"
             onClick={handleGetHelpClick}
+            aria-label="Get Help Now"
           >
             Get Help Now
           </Button>

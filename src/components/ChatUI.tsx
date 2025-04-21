@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -43,12 +42,10 @@ export function ChatUI({
   const [agentConnected, setAgentConnected] = useState(chatMode !== "standard");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Add a simulated "typing" indicator for more realistic helpline/emergency chats
   useEffect(() => {
     if ((chatMode === "helpline" || chatMode === "emergency") && messages.length === 1) {
       const timer = setTimeout(() => {
@@ -69,11 +66,9 @@ export function ChatUI({
     }
   }, [chatMode, messages]);
 
-  // Function to connect with a live agent (simulated)
   const connectWithLiveAgent = () => {
     setIsConnectingToAgent(true);
     
-    // Simulate connecting to an agent
     setTimeout(() => {
       const systemMessage: Message = {
         id: crypto.randomUUID(),
@@ -84,7 +79,6 @@ export function ChatUI({
       
       setMessages(prev => [...prev, systemMessage]);
       
-      // Simulate agent connection after a delay
       setTimeout(() => {
         const agentMessage: Message = {
           id: crypto.randomUUID(),
@@ -106,17 +100,14 @@ export function ChatUI({
     const userMessage = input.trim();
     const crisisCheck = detectCrisis(userMessage);
     
-    // Call the onUserMessage callback if provided
     if (onUserMessage) {
       onUserMessage(userMessage);
     }
     
-    // Set crisis mode if high-risk content detected
     if (crisisCheck.level === "high") {
       setIsCrisisMode(true);
     }
     
-    // Add user message to chat
     const newUserMessage: Message = {
       id: crypto.randomUUID(),
       role: "user",
@@ -129,9 +120,7 @@ export function ChatUI({
     setIsTyping(true);
     
     try {
-      // If in crisis mode or professional modes, create a special response flow
       if (isCrisisMode || chatMode === "emergency" || chatMode === "helpline" || crisisCheck.level === "high") {
-        // If crisis detected and not already connected to an agent, offer to connect
         if (crisisCheck.level === "high" && !agentConnected && chatMode === "standard") {
           setTimeout(() => {
             const crisisResponse: Message = {
@@ -148,12 +137,10 @@ export function ChatUI({
           return;
         }
         
-        // Simulate professional response with typing indicator
         setTimeout(() => {
           let responseContent = "";
           
           if (chatMode === "emergency" || isCrisisMode) {
-            // Emergency response templates
             const emergencyResponses = [
               "Thank you for sharing that. I understand this is difficult. What specific support do you need right now?",
               "I appreciate your courage in reaching out. Let's focus on what would help you feel safer right now.",
@@ -163,7 +150,6 @@ export function ChatUI({
             ];
             responseContent = emergencyResponses[Math.floor(Math.random() * emergencyResponses.length)];
           } else if (chatMode === "helpline" || agentConnected) {
-            // Professional helpline responses
             const helplineResponses = [
               "Thank you for sharing that with me. Can you tell me more about when you first started feeling this way?",
               "I understand, and I'm here to help you work through these feelings. What coping strategies have you tried so far?",
@@ -188,7 +174,6 @@ export function ChatUI({
         return;
       }
       
-      // Regular API call for non-crisis messages
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`, {
         method: "POST",
         headers: {
@@ -208,7 +193,6 @@ export function ChatUI({
       
       const data = await response.json();
       
-      // Add bot response to chat
       const botResponse: Message = {
         id: crypto.randomUUID(),
         role: "assistant",
@@ -216,7 +200,6 @@ export function ChatUI({
         timestamp: new Date()
       };
       
-      // Check if the AI detected a crisis
       if (data.inCrisis) {
         setIsCrisisMode(true);
       }
@@ -225,7 +208,6 @@ export function ChatUI({
     } catch (error) {
       console.error("Error sending message:", error);
       
-      // Fallback response
       const errorMessage: Message = {
         id: crypto.randomUUID(),
         role: "assistant",
@@ -240,8 +222,8 @@ export function ChatUI({
   };
 
   return (
-    <Card>
-      <div className="h-[50vh] md:h-[60vh] overflow-y-auto p-4">
+    <Card className="max-w-2xl mx-auto w-full shadow-md">
+      <div className="h-[50vh] md:h-[60vh] overflow-y-auto p-4 bg-white max-w-2xl mx-auto rounded-t-lg">
         {(chatMode === "helpline" || chatMode === "emergency") && (
           <div className="bg-sahayata-blue/10 rounded-lg p-3 mb-4 flex items-center gap-3">
             <div className="bg-sahayata-blue rounded-full p-2">
@@ -267,7 +249,7 @@ export function ChatUI({
               className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
             >
               <div
-                className={`max-w-[80%] p-3 rounded-lg ${
+                className={`max-w-[80%] p-3 rounded-lg break-words ${
                   msg.role === "user"
                     ? "bg-sahayata-blue text-white"
                     : msg.role === "system"
@@ -297,7 +279,7 @@ export function ChatUI({
           <div ref={messagesEndRef} />
         </div>
       </div>
-      <CardContent className="border-t p-4">
+      <CardContent className="border-t p-4 bg-sahayata-softGray">
         {!agentConnected && !isConnectingToAgent && messages.some(msg => msg.role === "system" && msg.content.includes("professional counselor")) && (
           <div className="mb-4 flex justify-center">
             <Button 
@@ -308,7 +290,7 @@ export function ChatUI({
             </Button>
           </div>
         )}
-      
+
         {isConnectingToAgent ? (
           <div className="flex items-center justify-center gap-2 p-4 bg-gray-50 rounded-lg">
             <Loader2 className="h-4 w-4 animate-spin text-sahayata-blue" />
@@ -326,7 +308,7 @@ export function ChatUI({
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type your message..."
-              className="min-h-24 resize-none"
+              className="min-h-24 resize-none flex-1"
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
