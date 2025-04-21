@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { MapPin, Phone, ExternalLink } from "lucide-react";
+import { MapPin, Phone, ExternalLink, Loader2 } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 type NearbySupportProps = {
@@ -53,6 +53,7 @@ export function NearbySupport({ language }: NearbySupportProps) {
   const [userLocation, setUserLocation] = useState<Location | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showPermissionDialog, setShowPermissionDialog] = useState(false);
+  const [supportCenters, setSupportCenters] = useState(mockNearbySupports);
 
   const translations = {
     english: {
@@ -89,14 +90,34 @@ export function NearbySupport({ language }: NearbySupportProps) {
 
   const t = translations[language];
 
+  // Check for geolocation availability on component mount
   useEffect(() => {
-    // Check if geolocation is available
     if ("geolocation" in navigator) {
-      setShowPermissionDialog(true);
+      // Show permission dialog if location permission is still pending
+      if (locationPermission === "pending") {
+        setShowPermissionDialog(true);
+      }
     } else {
       setLocationPermission("denied");
     }
-  }, []);
+  }, [locationPermission]);
+
+  // Load support centers when location is available
+  useEffect(() => {
+    if (userLocation) {
+      // In a real app, this would fetch nearby centers from an API
+      // For now, we're just using the mock data and setting a loading state
+      setIsLoading(true);
+      
+      // Simulate API call delay
+      setTimeout(() => {
+        // Sort centers by distance from user (in a real app)
+        const sortedCenters = [...mockNearbySupports];
+        setSupportCenters(sortedCenters);
+        setIsLoading(false);
+      }, 1000);
+    }
+  }, [userLocation]);
 
   const requestLocationPermission = () => {
     setIsLoading(true);
@@ -104,12 +125,12 @@ export function NearbySupport({ language }: NearbySupportProps) {
     
     navigator.geolocation.getCurrentPosition(
       (position) => {
+        console.log("Location permission granted:", position.coords);
         setLocationPermission("granted");
         setUserLocation({
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
         });
-        setIsLoading(false);
       },
       (error) => {
         console.error("Error getting location:", error);
@@ -147,7 +168,7 @@ export function NearbySupport({ language }: NearbySupportProps) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{t.notNow}</AlertDialogCancel>
+            <AlertDialogCancel onClick={() => setLocationPermission("denied")}>{t.notNow}</AlertDialogCancel>
             <AlertDialogAction onClick={requestLocationPermission}>
               {t.allow}
             </AlertDialogAction>
@@ -158,7 +179,7 @@ export function NearbySupport({ language }: NearbySupportProps) {
       {isLoading && (
         <div className="flex justify-center items-center py-12">
           <div className="animate-pulse text-center">
-            <MapPin className="h-10 w-10 text-sahayata-blue mx-auto mb-4" />
+            <Loader2 className="h-10 w-10 text-sahayata-blue mx-auto mb-4 animate-spin" />
             <p>{t.loading}</p>
           </div>
         </div>
@@ -173,9 +194,9 @@ export function NearbySupport({ language }: NearbySupportProps) {
         </div>
       )}
 
-      {locationPermission === "granted" && !isLoading && (
+      {locationPermission === "granted" && !isLoading && supportCenters.length > 0 && (
         <div className="space-y-4">
-          {mockNearbySupports.map((support, index) => (
+          {supportCenters.map((support, index) => (
             <Card key={index}>
               <CardContent className="p-4">
                 <div className="flex flex-col gap-3">
