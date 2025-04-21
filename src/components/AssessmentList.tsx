@@ -4,8 +4,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { BookOpen, Activity, Brain } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Link } from "react-router-dom";
+import { useI18n } from "@/lib/i18n/i18nContext";
 
 export function AssessmentList() {
+  const { t } = useI18n();
+  
   const assessments = [
     {
       id: "depression",
@@ -87,7 +90,9 @@ export function AssessmentList() {
               </div>
               <Progress value={assessment.progress} className="h-2 bg-gray-200" />
             </div>
-            <Button variant="outline" className="w-full">Begin Assessment</Button>
+            <Link to={`/assessment/${assessment.id}`}>
+              <Button variant="outline" className="w-full">Begin Assessment</Button>
+            </Link>
           </CardContent>
         </Card>
       ))}

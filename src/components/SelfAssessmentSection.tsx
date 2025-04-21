@@ -38,7 +38,9 @@ export function SelfAssessmentSection() {
                 </div>
                 <Progress value={33} className="h-2 bg-gray-200" />
               </div>
-              <Button variant="outline" className="w-full">Begin Assessment</Button>
+              <Link to="/assessment/depression">
+                <Button variant="outline" className="w-full">Begin Assessment</Button>
+              </Link>
             </CardContent>
           </Card>
           
@@ -63,7 +65,9 @@ export function SelfAssessmentSection() {
                 </div>
                 <Progress value={33} className="h-2 bg-gray-200" />
               </div>
-              <Button variant="outline" className="w-full">Begin Assessment</Button>
+              <Link to="/assessment/anxiety">
+                <Button variant="outline" className="w-full">Begin Assessment</Button>
+              </Link>
             </CardContent>
           </Card>
           
@@ -88,7 +92,9 @@ export function SelfAssessmentSection() {
                 </div>
                 <Progress value={33} className="h-2 bg-gray-200" />
               </div>
-              <Button variant="outline" className="w-full">Begin Assessment</Button>
+              <Link to="/assessment/stress">
+                <Button variant="outline" className="w-full">Begin Assessment</Button>
+              </Link>
             </CardContent>
           </Card>
         </div>

@@ -8,6 +8,7 @@ import { I18nProvider } from "@/lib/i18n/i18nContext";
 import Index from "./pages/Index";
 import SelfAssessment from "./pages/SelfAssessment";
 import AllAssessments from "./pages/AllAssessments";
+import AssessmentDetail from "./pages/AssessmentDetail";
 import Chat from "./pages/Chat";
 import MoodTracker from "./pages/MoodTracker";
 import NotFound from "./pages/NotFound";
@@ -26,6 +27,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/assessment" element={<SelfAssessment />} />
+            <Route path="/assessment/:id" element={<AssessmentDetail />} />
             <Route path="/all-assessments" element={<AllAssessments />} />
             <Route path="/chat" element={<Chat />} />
             <Route path="/mood-tracker" element={<MoodTracker />} />
