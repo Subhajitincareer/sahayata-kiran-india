@@ -1,3 +1,4 @@
+
 import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
 import { SelfAssessmentSection } from "@/components/SelfAssessmentSection";
@@ -11,9 +12,9 @@ import { LanguageSelector } from "@/components/LanguageSelector";
 
 const Index = () => {
   return (
-    <div className="font-poppins">
+    <div className="font-poppins min-h-screen flex flex-col">
       <Header />
-      <main>
+      <main className="flex-1">
         <Hero />
         <SelfAssessmentSection />
         <CrisisHelplineSection />

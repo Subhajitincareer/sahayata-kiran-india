@@ -1,14 +1,17 @@
+
 import { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Loader2, Send, AlertCircle } from "lucide-react";
+import { Loader2, Send, AlertCircle, Phone } from "lucide-react";
 import { detectCrisis } from "@/lib/crisis-detection";
 
 interface ChatUIProps {
   sessionId: string;
   initialMood?: string;
   onUserMessage?: (message: string) => void;
+  chatMode?: "standard" | "helpline" | "emergency";
+  initialMessage?: string;
 }
 
 type Message = {
@@ -18,24 +21,84 @@ type Message = {
   timestamp: Date;
 };
 
-export function ChatUI({ sessionId, initialMood, onUserMessage }: ChatUIProps) {
+export function ChatUI({ 
+  sessionId, 
+  initialMood = "neutral", 
+  onUserMessage, 
+  chatMode = "standard",
+  initialMessage
+}: ChatUIProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: crypto.randomUUID(),
       role: "assistant",
-      content: "Hi there! I'm Kiran, your supportive chat assistant. How can I help you today?",
+      content: initialMessage || "Hi there! I'm Kiran, your supportive chat assistant. How can I help you today?",
       timestamp: new Date()
     }
   ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const [isCrisisMode, setIsCrisisMode] = useState(false);
+  const [isCrisisMode, setIsCrisisMode] = useState(chatMode === "emergency");
+  const [isConnectingToAgent, setIsConnectingToAgent] = useState(false);
+  const [agentConnected, setAgentConnected] = useState(chatMode !== "standard");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // Add a simulated "typing" indicator for more realistic helpline/emergency chats
+  useEffect(() => {
+    if ((chatMode === "helpline" || chatMode === "emergency") && messages.length === 1) {
+      const timer = setTimeout(() => {
+        setIsTyping(false);
+        const initialFollowUp: Message = {
+          id: crypto.randomUUID(),
+          role: "assistant",
+          content: chatMode === "emergency" 
+            ? "I want you to know that we're here for you in this difficult moment. Please feel free to share what's going on, and I'll do my best to provide appropriate support."
+            : "Feel free to share what's on your mind. This is a safe space, and I'm here to listen and help.",
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, initialFollowUp]);
+      }, 3000);
+      
+      setIsTyping(true);
+      return () => clearTimeout(timer);
+    }
+  }, [chatMode, messages]);
+
+  // Function to connect with a live agent (simulated)
+  const connectWithLiveAgent = () => {
+    setIsConnectingToAgent(true);
+    
+    // Simulate connecting to an agent
+    setTimeout(() => {
+      const systemMessage: Message = {
+        id: crypto.randomUUID(),
+        role: "system",
+        content: "Connecting you with a professional counselor...",
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, systemMessage]);
+      
+      // Simulate agent connection after a delay
+      setTimeout(() => {
+        const agentMessage: Message = {
+          id: crypto.randomUUID(),
+          role: "assistant",
+          content: "Hello, I'm Counselor Priya, a professional with Sahayata Kiran. I've reviewed your conversation and I'm here to provide personalized support. How are you feeling right now?",
+          timestamp: new Date()
+        };
+        
+        setMessages(prev => [...prev, agentMessage]);
+        setIsConnectingToAgent(false);
+        setAgentConnected(true);
+      }, 3000);
+    }, 1000);
+  };
 
   const handleSendMessage = async () => {
     if (!input.trim()) return;
@@ -66,19 +129,61 @@ export function ChatUI({ sessionId, initialMood, onUserMessage }: ChatUIProps) {
     setIsTyping(true);
     
     try {
-      // If in crisis mode, create a special message
-      if (isCrisisMode || crisisCheck.level === "high") {
+      // If in crisis mode or professional modes, create a special response flow
+      if (isCrisisMode || chatMode === "emergency" || chatMode === "helpline" || crisisCheck.level === "high") {
+        // If crisis detected and not already connected to an agent, offer to connect
+        if (crisisCheck.level === "high" && !agentConnected && chatMode === "standard") {
+          setTimeout(() => {
+            const crisisResponse: Message = {
+              id: crypto.randomUUID(),
+              role: "system",
+              content: "I notice you may be going through a difficult time. Would you like to connect with a professional counselor for immediate support?",
+              timestamp: new Date()
+            };
+            
+            setMessages(prev => [...prev, crisisResponse]);
+            setIsTyping(false);
+          }, 1000);
+          
+          return;
+        }
+        
+        // Simulate professional response with typing indicator
         setTimeout(() => {
-          const crisisResponse: Message = {
+          let responseContent = "";
+          
+          if (chatMode === "emergency" || isCrisisMode) {
+            // Emergency response templates
+            const emergencyResponses = [
+              "Thank you for sharing that. I understand this is difficult. What specific support do you need right now?",
+              "I appreciate your courage in reaching out. Let's focus on what would help you feel safer right now.",
+              "I hear you, and I want you to know that what you're feeling is valid. Let's work through this together, step by step.",
+              "Your safety is our priority. Can you tell me more about what you're experiencing so I can provide the most helpful support?",
+              "It's important that you reached out. Let's talk about some immediate strategies that might help you through this moment."
+            ];
+            responseContent = emergencyResponses[Math.floor(Math.random() * emergencyResponses.length)];
+          } else if (chatMode === "helpline" || agentConnected) {
+            // Professional helpline responses
+            const helplineResponses = [
+              "Thank you for sharing that with me. Can you tell me more about when you first started feeling this way?",
+              "I understand, and I'm here to help you work through these feelings. What coping strategies have you tried so far?",
+              "That sounds really challenging. Let's explore some ways to address what you're going through.",
+              "I appreciate you trusting me with this information. Have you spoken to anyone else about what you're experiencing?",
+              "Your feelings are completely valid. Let's discuss some practical steps that might help you manage this situation."
+            ];
+            responseContent = helplineResponses[Math.floor(Math.random() * helplineResponses.length)];
+          }
+          
+          const response: Message = {
             id: crypto.randomUUID(),
-            role: "system",
-            content: "I notice you may be going through a difficult time. Please consider reaching out to a professional for immediate support. Our emergency resources are available 24/7 - click the Emergency Help button for direct access to trained counselors.",
+            role: "assistant",
+            content: responseContent,
             timestamp: new Date()
           };
           
-          setMessages(prev => [...prev, crisisResponse]);
+          setMessages(prev => [...prev, response]);
           setIsTyping(false);
-        }, 1000);
+        }, 2000 + Math.random() * 1000);
         
         return;
       }
@@ -137,6 +242,24 @@ export function ChatUI({ sessionId, initialMood, onUserMessage }: ChatUIProps) {
   return (
     <Card>
       <div className="h-[50vh] md:h-[60vh] overflow-y-auto p-4">
+        {(chatMode === "helpline" || chatMode === "emergency") && (
+          <div className="bg-sahayata-blue/10 rounded-lg p-3 mb-4 flex items-center gap-3">
+            <div className="bg-sahayata-blue rounded-full p-2">
+              <Phone className="h-4 w-4 text-white" />
+            </div>
+            <div>
+              <p className="font-medium text-sm">
+                {chatMode === "emergency" ? "Emergency Support Line" : "Professional Helpline"}
+              </p>
+              <p className="text-xs text-gray-600">
+                {chatMode === "emergency" 
+                  ? "Priority support with trained crisis counselors" 
+                  : "Confidential support with professional counselors"}
+              </p>
+            </div>
+          </div>
+        )}
+      
         <div className="space-y-4">
           {messages.map((msg) => (
             <div
@@ -175,29 +298,47 @@ export function ChatUI({ sessionId, initialMood, onUserMessage }: ChatUIProps) {
         </div>
       </div>
       <CardContent className="border-t p-4">
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSendMessage();
-          }}
-          className="flex items-end gap-2"
-        >
-          <Textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Type your message..."
-            className="min-h-24 resize-none"
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                handleSendMessage();
-              }
+        {!agentConnected && !isConnectingToAgent && messages.some(msg => msg.role === "system" && msg.content.includes("professional counselor")) && (
+          <div className="mb-4 flex justify-center">
+            <Button 
+              onClick={connectWithLiveAgent} 
+              className="bg-sahayata-blue hover:bg-sahayata-blue/80"
+            >
+              Connect with Professional
+            </Button>
+          </div>
+        )}
+      
+        {isConnectingToAgent ? (
+          <div className="flex items-center justify-center gap-2 p-4 bg-gray-50 rounded-lg">
+            <Loader2 className="h-4 w-4 animate-spin text-sahayata-blue" />
+            <span className="text-sm">Connecting to a professional counselor...</span>
+          </div>
+        ) : (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSendMessage();
             }}
-          />
-          <Button type="submit" size="icon" disabled={isTyping || !input.trim()}>
-            {isTyping ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-          </Button>
-        </form>
+            className="flex items-end gap-2"
+          >
+            <Textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Type your message..."
+              className="min-h-24 resize-none"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSendMessage();
+                }
+              }}
+            />
+            <Button type="submit" size="icon" disabled={isTyping || !input.trim()}>
+              {isTyping ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+            </Button>
+          </form>
+        )}
       </CardContent>
     </Card>
   );

@@ -2,8 +2,21 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Phone, MessageCircle, Shield } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export function CrisisHelplineSection() {
+  const navigate = useNavigate();
+  
+  const handleCallNow = () => {
+    // Direct call to helpline
+    window.location.href = "tel:9152987821";
+  };
+  
+  const handleTextSupport = () => {
+    // Navigate to chat with "helpline" mode
+    navigate("/chat", { state: { mode: "helpline" } });
+  };
+
   return (
     <section className="py-16 bg-sahayata-softGray">
       <div className="container">
@@ -26,7 +39,7 @@ export function CrisisHelplineSection() {
               <p className="opacity-90">Trained counselors available 24/7</p>
             </div>
             <CardContent className="p-6 space-y-4">
-              <div className="flex items-center gap-4 p-4 bg-sahayata-lightBlue/50 rounded-lg">
+              <div className="flex items-center gap-4 p-4 bg-sahayata-lightBlue/50 rounded-lg cursor-pointer" onClick={handleCallNow}>
                 <div className="bg-white p-3 rounded-full shadow-sm">
                   <Phone className="h-6 w-6 text-sahayata-blue" />
                 </div>
@@ -36,7 +49,7 @@ export function CrisisHelplineSection() {
                 </div>
               </div>
               
-              <div className="flex items-center gap-4 p-4 bg-sahayata-purple/20 rounded-lg">
+              <div className="flex items-center gap-4 p-4 bg-sahayata-purple/20 rounded-lg cursor-pointer" onClick={handleTextSupport}>
                 <div className="bg-white p-3 rounded-full shadow-sm">
                   <MessageCircle className="h-6 w-6 text-sahayata-blue" />
                 </div>
@@ -50,7 +63,7 @@ export function CrisisHelplineSection() {
                 <p className="text-sm text-gray-600 mb-4">
                   Professional counselors provide confidential emotional support for those in distress.
                 </p>
-                <Button className="w-full bg-sahayata-blue hover:bg-sahayata-blue/80">Call Now</Button>
+                <Button className="w-full bg-sahayata-blue hover:bg-sahayata-blue/80" onClick={handleCallNow}>Call Now</Button>
               </div>
             </CardContent>
           </Card>
