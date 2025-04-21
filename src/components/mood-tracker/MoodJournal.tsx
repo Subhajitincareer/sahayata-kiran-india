@@ -10,6 +10,7 @@ import { formatDate } from "@/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { detectCrisis, getCrisisActions, getSupportiveMessage } from "@/lib/crisis-detection";
+import { useI18n } from "@/lib/i18n/i18nContext";
 
 export type MoodEntry = {
   id: string;
@@ -22,6 +23,7 @@ export type MoodEntry = {
 };
 
 export function MoodJournal() {
+  const { t } = useI18n();
   const [mood, setMood] = useState<string | null>(null);
   const [journal, setJournal] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -65,8 +67,8 @@ export function MoodJournal() {
       if (level === "moderate" || level === "high") {
         const supportiveMessage = getSupportiveMessage(level);
         if (supportiveMessage) {
-          toast({
-            title: "We're here for you",
+          // Fix: Using the correct toast format - toast(message) or toast.success/error/etc
+          toast("We're here for you", {
             description: supportiveMessage,
             duration: 10000,
           });
@@ -138,7 +140,7 @@ export function MoodJournal() {
     <div className="space-y-8">
       <Card>
         <CardHeader>
-          <CardTitle>{todaysEntry ? "Update Today's Mood" : "How are you feeling today?"}</CardTitle>
+          <CardTitle>{todaysEntry ? t("mood.updateToday") : t("mood.howAreYou")}</CardTitle>
           <CardDescription>{formatDate(new Date())}</CardDescription>
         </CardHeader>
         <CardContent>
@@ -149,14 +151,14 @@ export function MoodJournal() {
       {mood && (
         <Card>
           <CardHeader>
-            <CardTitle>Journal Entry</CardTitle>
-            <CardDescription>Write about your thoughts and feelings today</CardDescription>
+            <CardTitle>{t("mood.journalEntry")}</CardTitle>
+            <CardDescription>{t("mood.journalDescription")}</CardDescription>
           </CardHeader>
           <CardContent>
             {(crisisDetected === "moderate" || crisisDetected === "high") && (
               <Alert variant="destructive" className="mb-4">
                 <AlertCircle className="h-4 w-4" />
-                <AlertTitle>We notice you're going through a difficult time</AlertTitle>
+                <AlertTitle>{t("mood.crisisDetectedTitle")}</AlertTitle>
                 <AlertDescription>
                   {getSupportiveMessage(crisisDetected)}
                 </AlertDescription>
@@ -166,7 +168,7 @@ export function MoodJournal() {
             {crisisDetected === "low" && (
               <Alert className="mb-4">
                 <AlertCircle className="h-4 w-4" />
-                <AlertTitle>We're here to support you</AlertTitle>
+                <AlertTitle>{t("mood.supportTitle")}</AlertTitle>
                 <AlertDescription>
                   {getSupportiveMessage(crisisDetected)}
                 </AlertDescription>
@@ -174,7 +176,7 @@ export function MoodJournal() {
             )}
             
             <Textarea
-              placeholder="How was your day? What's on your mind?"
+              placeholder={t("mood.journal")}
               className="min-h-[200px]"
               value={journal}
               onChange={(e) => setJournal(e.target.value)}
@@ -184,7 +186,7 @@ export function MoodJournal() {
                 onClick={() => saveJournalEntry()}
                 disabled={isSubmitting}
               >
-                {isSubmitting ? "Saving..." : "Save Entry"}
+                {isSubmitting ? t("mood.saving") : t("mood.save")}
               </Button>
             </div>
           </CardContent>

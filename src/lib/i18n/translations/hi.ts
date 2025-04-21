@@ -29,9 +29,15 @@ export const hi = {
   },
   mood: {
     howAreYou: "आज आप कैसा महसूस कर रहे हैं?",
+    updateToday: "आज का मूड अपडेट करें",
     journal: "अपने दिन के बारे में लिखें...",
+    journalEntry: "डायरी एंट्री",
+    journalDescription: "अपने विचारों और भावनाओं के बारे में लिखें",
     save: "एंट्री सहेजें",
+    saving: "सहेज रहा है...",
     viewHistory: "इतिहास देखें",
-    trends: "आपके मूड ट्रेंड्स"
+    trends: "आपके मूड ट्रेंड्स",
+    crisisDetectedTitle: "हमें लगता है कि आप मुश्किल समय से गुजर रहे हैं",
+    supportTitle: "हम आपका समर्थन करने के लिए यहां हैं"
   }
 };

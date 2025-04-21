@@ -29,9 +29,15 @@ export const en = {
   },
   mood: {
     howAreYou: "How are you feeling today?",
+    updateToday: "Update Today's Mood",
     journal: "Write about your day...",
+    journalEntry: "Journal Entry",
+    journalDescription: "Write about your thoughts and feelings today",
     save: "Save Entry",
+    saving: "Saving...",
     viewHistory: "View History",
-    trends: "Your Mood Trends"
+    trends: "Your Mood Trends",
+    crisisDetectedTitle: "We notice you're going through a difficult time",
+    supportTitle: "We're here to support you"
   }
 };
