@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { MapPin, Phone, ExternalLink, Loader2 } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { useToast } from "@/hooks/use-toast";
 
 type NearbySupportProps = {
   language: "english" | "hindi";
@@ -54,6 +55,7 @@ export function NearbySupport({ language }: NearbySupportProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [showPermissionDialog, setShowPermissionDialog] = useState(false);
   const [supportCenters, setSupportCenters] = useState(mockNearbySupports);
+  const { toast } = useToast();
 
   const translations = {
     english: {
@@ -70,6 +72,8 @@ export function NearbySupport({ language }: NearbySupportProps) {
       type: "Type",
       distance: "Distance",
       loading: "Finding nearby support centers...",
+      locationSuccess: "Location found! Loading nearby support centers...",
+      locationError: "Couldn't access your location. Please try again.",
     },
     hindi: {
       title: "आस-पास के सहायता केंद्र",
@@ -85,6 +89,8 @@ export function NearbySupport({ language }: NearbySupportProps) {
       type: "प्रकार",
       distance: "दूरी",
       loading: "आस-पास के सहायता केंद्रों की खोज कर रहे हैं...",
+      locationSuccess: "स्थान मिल गया! आस-पास के सहायता केंद्र लोड कर रहे हैं...",
+      locationError: "आपका स्थान एक्सेस नहीं कर सके। कृपया पुनः प्रयास करें।",
     }
   };
 
@@ -100,7 +106,7 @@ export function NearbySupport({ language }: NearbySupportProps) {
     } else {
       setLocationPermission("denied");
     }
-  }, [locationPermission]);
+  }, []);
 
   // Load support centers when location is available
   useEffect(() => {
@@ -108,6 +114,11 @@ export function NearbySupport({ language }: NearbySupportProps) {
       // In a real app, this would fetch nearby centers from an API
       // For now, we're just using the mock data and setting a loading state
       setIsLoading(true);
+      
+      toast({
+        title: t.locationSuccess,
+        duration: 3000,
+      });
       
       // Simulate API call delay
       setTimeout(() => {
@@ -117,7 +128,7 @@ export function NearbySupport({ language }: NearbySupportProps) {
         setIsLoading(false);
       }, 1000);
     }
-  }, [userLocation]);
+  }, [userLocation, t, toast]);
 
   const requestLocationPermission = () => {
     setIsLoading(true);
@@ -136,7 +147,13 @@ export function NearbySupport({ language }: NearbySupportProps) {
         console.error("Error getting location:", error);
         setLocationPermission("denied");
         setIsLoading(false);
-      }
+        toast({
+          title: t.locationError,
+          variant: "destructive",
+          duration: 3000,
+        });
+      },
+      { timeout: 10000, enableHighAccuracy: true }
     );
   };
 
@@ -188,7 +205,10 @@ export function NearbySupport({ language }: NearbySupportProps) {
       {locationPermission === "denied" && !isLoading && (
         <div className="text-center py-8">
           <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <Button onClick={() => setShowPermissionDialog(true)}>
+          <Button onClick={() => {
+            setShowPermissionDialog(true); 
+            setLocationPermission("pending");
+          }}>
             {t.grantPermission}
           </Button>
         </div>
