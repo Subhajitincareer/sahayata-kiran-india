@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,6 +10,7 @@ import Chat from "./pages/Chat";
 import MoodTracker from "./pages/MoodTracker";
 import NotFound from "./pages/NotFound";
 import { EmergencyHelpButton } from "./components/EmergencyHelpButton";
+import { MobileMenubar } from "@/components/MobileMenubar";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +29,7 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
           <EmergencyHelpButton />
+          <MobileMenubar />
         </BrowserRouter>
       </TooltipProvider>
     </I18nProvider>
