@@ -7,13 +7,21 @@ import { LanguageSelector } from "@/components/LanguageSelector";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { BookOpen, Activity, Brain, ArrowLeft } from "lucide-react";
+import { BookOpen, Activity, Brain, ArrowLeft, Check } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 
 const AssessmentDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [assessment, setAssessment] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [started, setStarted] = useState(false);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [answers, setAnswers] = useState<Record<number, number>>({});
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     // Simulate fetching assessment data
@@ -118,6 +126,48 @@ const AssessmentDetail = () => {
     }, 500);
   }, [id]);
 
+  const handleStartAssessment = () => {
+    setStarted(true);
+    setProgress(5); // Initial progress
+    toast({
+      title: "Assessment Started",
+      description: "Please answer all questions honestly.",
+    });
+  };
+
+  const handleAnswerSelect = (value: string) => {
+    const numValue = parseInt(value);
+    
+    setAnswers({
+      ...answers,
+      [currentQuestionIndex]: numValue
+    });
+  };
+
+  const handleNextQuestion = () => {
+    if (currentQuestionIndex < assessment.questions.length - 1) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+      
+      // Calculate progress percentage
+      const newProgress = Math.floor(((currentQuestionIndex + 2) / assessment.questions.length) * 100);
+      setProgress(newProgress);
+    } else {
+      // Assessment completed
+      const score = Object.values(answers).reduce((sum: number, val: any) => sum + val, 0);
+      
+      toast({
+        title: "Assessment Completed",
+        description: `Thank you for completing the assessment. Your score: ${score}`,
+      });
+      
+      // Reset for demonstration purposes
+      setStarted(false);
+      setCurrentQuestionIndex(0);
+      setAnswers({});
+      setProgress(100);
+    }
+  };
+
   if (loading) {
     return (
       <div className="font-poppins">
@@ -169,55 +219,112 @@ const AssessmentDetail = () => {
             </Button>
           </div>
 
-          <div className="mb-8">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3">
-                  <span className="bg-sahayata-purple/20 p-3 rounded-full">
-                    {assessment.icon}
-                  </span>
-                  {assessment.title}
-                </CardTitle>
-                <p className="text-sahayata-neutralGray mt-2">{assessment.description}</p>
-              </CardHeader>
-              <CardContent>
-                <div className="mb-6">
-                  <h3 className="text-lg font-medium mb-2">About this assessment</h3>
-                  <p className="text-gray-700">{assessment.details}</p>
-                </div>
-
-                <div className="mb-6">
-                  <h3 className="text-lg font-medium mb-4">Sample questions</h3>
-                  <ul className="space-y-3">
-                    {assessment.questions.slice(0, 3).map((question: string, index: number) => (
-                      <li key={index} className="bg-gray-50 p-3 rounded-md">
-                        {question}
-                      </li>
-                    ))}
-                  </ul>
-                  <p className="mt-3 text-sm text-gray-500">
-                    ...and {assessment.questions.length - 3} more questions
-                  </p>
-                </div>
-
-                <div className="mb-6">
-                  <div className="flex justify-between text-sm mb-2">
-                    <span>Estimated completion time</span>
-                    <span>3-5 minutes</span>
+          {!started ? (
+            <div className="mb-8">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3">
+                    <span className="bg-sahayata-purple/20 p-3 rounded-full">
+                      {assessment.icon}
+                    </span>
+                    {assessment.title}
+                  </CardTitle>
+                  <p className="text-sahayata-neutralGray mt-2">{assessment.description}</p>
+                </CardHeader>
+                <CardContent>
+                  <div className="mb-6">
+                    <h3 className="text-lg font-medium mb-2">About this assessment</h3>
+                    <p className="text-gray-700">{assessment.details}</p>
                   </div>
-                  <Progress value={0} className="h-2 bg-gray-200" />
-                </div>
 
-                <Button className="w-full bg-sahayata-blue hover:bg-sahayata-blue/80">
-                  Start Assessment
-                </Button>
+                  <div className="mb-6">
+                    <h3 className="text-lg font-medium mb-4">Sample questions</h3>
+                    <ul className="space-y-3">
+                      {assessment.questions.slice(0, 3).map((question: string, index: number) => (
+                        <li key={index} className="bg-gray-50 p-3 rounded-md">
+                          {question}
+                        </li>
+                      ))}
+                    </ul>
+                    <p className="mt-3 text-sm text-gray-500">
+                      ...and {assessment.questions.length - 3} more questions
+                    </p>
+                  </div>
 
-                <p className="mt-4 text-xs text-center text-gray-500">
-                  This assessment is for informational purposes only and is not a substitute for professional medical advice, diagnosis, or treatment.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
+                  <div className="mb-6">
+                    <div className="flex justify-between text-sm mb-2">
+                      <span>Estimated completion time</span>
+                      <span>3-5 minutes</span>
+                    </div>
+                    <Progress value={0} className="h-2 bg-gray-200" />
+                  </div>
+
+                  <Button 
+                    className="w-full bg-sahayata-blue hover:bg-sahayata-blue/80" 
+                    onClick={handleStartAssessment}
+                  >
+                    Start Assessment
+                  </Button>
+
+                  <p className="mt-4 text-xs text-center text-gray-500">
+                    This assessment is for informational purposes only and is not a substitute for professional medical advice, diagnosis, or treatment.
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          ) : (
+            <div className="mb-8">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3">
+                    <span className="bg-sahayata-purple/20 p-3 rounded-full">
+                      {assessment.icon}
+                    </span>
+                    {assessment.title} - Question {currentQuestionIndex + 1}/{assessment.questions.length}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="mb-6">
+                    <Progress value={progress} className="h-2 mb-4" />
+                    <h3 className="text-lg font-medium mb-4">
+                      {assessment.questions[currentQuestionIndex]}
+                    </h3>
+                    
+                    <RadioGroup 
+                      className="space-y-4 mt-6"
+                      value={answers[currentQuestionIndex]?.toString()}
+                      onValueChange={handleAnswerSelect}
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="0" id="option1" />
+                        <Label htmlFor="option1">Not at all</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="1" id="option2" />
+                        <Label htmlFor="option2">Several days</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="2" id="option3" />
+                        <Label htmlFor="option3">More than half the days</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="3" id="option4" />
+                        <Label htmlFor="option4">Nearly every day</Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+
+                  <Button 
+                    className="w-full bg-sahayata-blue hover:bg-sahayata-blue/80 mt-4" 
+                    onClick={handleNextQuestion}
+                    disabled={answers[currentQuestionIndex] === undefined}
+                  >
+                    {currentQuestionIndex < assessment.questions.length - 1 ? "Next Question" : "Complete Assessment"}
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </div>
       </main>
       <Footer />
