@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BookOpen } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { Link } from "react-router-dom";
 
 export function SelfAssessmentSection() {
   return (
@@ -96,7 +97,9 @@ export function SelfAssessmentSection() {
           <p className="text-sm text-gray-500 max-w-lg mx-auto mb-4">
             All assessments are anonymous and confidential. Results are for guidance only and do not replace professional diagnosis.
           </p>
-          <Button className="bg-sahayata-blue hover:bg-sahayata-blue/80">View All Assessments</Button>
+          <Link to="/all-assessments">
+            <Button className="bg-sahayata-blue hover:bg-sahayata-blue/80">View All Assessments</Button>
+          </Link>
         </div>
       </div>
     </section>

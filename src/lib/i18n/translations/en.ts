@@ -39,5 +39,12 @@ export const en = {
     trends: "Your Mood Trends",
     crisisDetectedTitle: "We notice you're going through a difficult time",
     supportTitle: "We're here to support you"
+  },
+  assessment: {
+    title: "Mental Health Self-Assessment",
+    subtitle: "Take a confidential assessment to understand your mental health",
+    viewAll: "View All Assessments",
+    allTitle: "All Mental Health Assessments",
+    allSubtitle: "Browse our comprehensive collection of assessment tools"
   }
 };
