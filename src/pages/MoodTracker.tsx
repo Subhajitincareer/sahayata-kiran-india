@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -8,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar, ChartLine, BookText } from "lucide-react";
 import { useUser } from "@/hooks/useUser";
 import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button"; // Add Button import
 
 export default function MoodTracker() {
   const { user, loading } = useUser();

@@ -1,10 +1,10 @@
+
 import { useState, useEffect } from "react";
 import { MoodSelector } from "@/components/MoodSelector";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { saveToLocalStorage, getFromLocalStorage } from "@/lib/storage";
 import { formatDate } from "@/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
@@ -30,6 +30,7 @@ export function MoodJournal() {
   const [journal, setJournal] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [todaysEntry, setTodaysEntry] = useState<MoodEntry | null>(null);
+  // Fix the type issue by ensuring the state is initialized with a valid value
   const [crisisDetected, setCrisisDetected] = useState<"none" | "low" | "moderate" | "high">("none");
 
   const today = new Date().toISOString().split('T')[0];
@@ -48,7 +49,11 @@ export function MoodJournal() {
           setTodaysEntry(data);
           setMood(data.mood);
           setJournal(data.journal || "");
-          if (data.crisis_level && data.crisis_level !== "none") {
+          if (data.crisis_level && 
+              (data.crisis_level === "none" || 
+               data.crisis_level === "low" || 
+               data.crisis_level === "moderate" || 
+               data.crisis_level === "high")) {
             setCrisisDetected(data.crisis_level);
           }
         }

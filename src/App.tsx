@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -16,35 +17,39 @@ import { EmergencyHelpButton } from "./components/EmergencyHelpButton";
 import { MobileMenubar } from "@/components/MobileMenubar";
 import { UserProvider } from "@/hooks/useUser";
 import AuthPage from "@/pages/Auth";
+import { useState } from "react";
 
-const queryClient = new QueryClient();
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <UserProvider>
-      <I18nProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/auth" element={<AuthPage />} />
-              <Route path="/" element={<Index />} />
-              <Route path="/assessment" element={<SelfAssessment />} />
-              <Route path="/assessment/:id" element={<AssessmentDetail />} />
-              <Route path="/all-assessments" element={<AllAssessments />} />
-              <Route path="/chat" element={<Chat />} />
-              <Route path="/mood-tracker" element={<MoodTracker />} />
-              <Route path="/resources" element={<Resources />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            <EmergencyHelpButton />
-            <MobileMenubar />
-          </BrowserRouter>
-        </TooltipProvider>
-      </I18nProvider>
-    </UserProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  // Create a new QueryClient instance within the component to avoid SSR/hydration issues
+  const [queryClient] = useState(() => new QueryClient());
+  
+  return (
+    <QueryClientProvider client={queryClient}>
+      <UserProvider>
+        <I18nProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/auth" element={<AuthPage />} />
+                <Route path="/" element={<Index />} />
+                <Route path="/assessment" element={<SelfAssessment />} />
+                <Route path="/assessment/:id" element={<AssessmentDetail />} />
+                <Route path="/all-assessments" element={<AllAssessments />} />
+                <Route path="/chat" element={<Chat />} />
+                <Route path="/mood-tracker" element={<MoodTracker />} />
+                <Route path="/resources" element={<Resources />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+              <EmergencyHelpButton />
+              <MobileMenubar />
+            </BrowserRouter>
+          </TooltipProvider>
+        </I18nProvider>
+      </UserProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
