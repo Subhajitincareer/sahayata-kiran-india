@@ -6,23 +6,16 @@ This guide covers how to deploy the Sahayata Kiran application to various platfo
 
 ### Setup
 
-1. **Install the gh-pages package:**
+1. **Ensure Vite Configuration**
+   The `vite.config.ts` should already include:
+   ```typescript
+   base: '/sahayata-kiran/'
+   ```
+
+2. **Install gh-pages package:**
 
 ```bash
 npm install --save-dev gh-pages
-```
-
-2. **Update `vite.config.ts` to include the base path:**
-
-```typescript
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-
-// https://vitejs.dev/config/
-export default defineConfig({
-  plugins: [react()],
-  base: '/sahayata-kiran/', // Replace with your repository name
-})
 ```
 
 3. **Add deployment scripts to `package.json`:**
