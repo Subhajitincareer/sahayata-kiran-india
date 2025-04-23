@@ -2,8 +2,9 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { MapPin, Phone, ExternalLink, Loader2 } from "lucide-react";
+import { MapPin, Phone, ExternalLink, Loader2, Navigation } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 
 type NearbySupportProps = {
@@ -54,6 +55,7 @@ export function NearbySupport({ language }: NearbySupportProps) {
   const [userLocation, setUserLocation] = useState<Location | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showPermissionDialog, setShowPermissionDialog] = useState(false);
+  const [locationError, setLocationError] = useState<string | null>(null);
   const [supportCenters, setSupportCenters] = useState(mockNearbySupports);
   const { toast } = useToast();
 
@@ -74,6 +76,11 @@ export function NearbySupport({ language }: NearbySupportProps) {
       loading: "Finding nearby support centers...",
       locationSuccess: "Location found! Loading nearby support centers...",
       locationError: "Couldn't access your location. Please try again.",
+      timeoutError: "Location request timed out. Please try again.",
+      permissionDeniedError: "Location permission was denied. Grant permission to see nearby centers.",
+      positionUnavailableError: "Your location information is unavailable. Please try again later.",
+      showWithoutLocation: "Show Support Centers Anyway",
+      browserLocationNotSupported: "Your browser doesn't support geolocation. Please try a different browser.",
     },
     hindi: {
       title: "आस-पास के सहायता केंद्र",
@@ -91,6 +98,11 @@ export function NearbySupport({ language }: NearbySupportProps) {
       loading: "आस-पास के सहायता केंद्रों की खोज कर रहे हैं...",
       locationSuccess: "स्थान मिल गया! आस-पास के सहायता केंद्र लोड कर रहे हैं...",
       locationError: "आपका स्थान एक्सेस नहीं कर सके। कृपया पुनः प्रयास करें।",
+      timeoutError: "स्थान अनुरोध का समय समाप्त हो गया। कृपया पुनः प्रयास करें।",
+      permissionDeniedError: "स्थान अनुमति अस्वीकार कर दी गई। निकटतम केंद्र देखने के लिए अनुमति दें।",
+      positionUnavailableError: "आपकी स्थान जानकारी उपलब्ध नहीं है। कृपया बाद में पुनः प्रयास करें।",
+      showWithoutLocation: "फिर भी सहायता केंद्र दिखाएँ",
+      browserLocationNotSupported: "आपका ब्राउज़र जियोलोकेशन का समर्थन नहीं करता है। कृपया एक अलग ब्राउज़र का प्रयास करें।",
     }
   };
 
@@ -109,6 +121,7 @@ export function NearbySupport({ language }: NearbySupportProps) {
             setShowPermissionDialog(true);
           } else {
             setLocationPermission('denied');
+            setLocationError(t.permissionDeniedError);
           }
         })
         .catch(() => {
@@ -117,7 +130,17 @@ export function NearbySupport({ language }: NearbySupportProps) {
         });
     } else {
       setLocationPermission("denied");
+      setLocationError(t.browserLocationNotSupported);
     }
+    // Set a timeout to show centers anyway if location takes too long
+    const timeoutId = setTimeout(() => {
+      if (isLoading && !userLocation) {
+        setIsLoading(false);
+        setLocationError(t.timeoutError);
+      }
+    }, 15000);
+
+    return () => clearTimeout(timeoutId);
   }, []);
 
   // Load support centers when location is available
@@ -144,6 +167,7 @@ export function NearbySupport({ language }: NearbySupportProps) {
 
   const requestLocationUpdates = () => {
     setIsLoading(true);
+    setLocationError(null);
     
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -158,6 +182,22 @@ export function NearbySupport({ language }: NearbySupportProps) {
         console.error("Error getting location:", error);
         setLocationPermission("denied");
         setIsLoading(false);
+        
+        // Provide specific error messages based on the error code
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            setLocationError(t.permissionDeniedError);
+            break;
+          case error.POSITION_UNAVAILABLE:
+            setLocationError(t.positionUnavailableError);
+            break;
+          case error.TIMEOUT:
+            setLocationError(t.timeoutError);
+            break;
+          default:
+            setLocationError(t.locationError);
+        }
+        
         toast({
           title: t.locationError,
           variant: "destructive",
@@ -171,6 +211,7 @@ export function NearbySupport({ language }: NearbySupportProps) {
   const requestLocationPermission = () => {
     setIsLoading(true);
     setShowPermissionDialog(false);
+    setLocationError(null);
     requestLocationUpdates();
   };
 
@@ -184,6 +225,11 @@ export function NearbySupport({ language }: NearbySupportProps) {
     } else {
       window.open(`https://maps.google.com/?q=${encodeURIComponent(address)}`, "_blank");
     }
+  };
+
+  const handleShowWithoutLocation = () => {
+    setIsLoading(false);
+    setLocationError(null);
   };
 
   return (
@@ -219,7 +265,32 @@ export function NearbySupport({ language }: NearbySupportProps) {
         </div>
       )}
 
-      {locationPermission === "denied" && !isLoading && (
+      {locationError && !isLoading && (
+        <div className="mb-6">
+          <Alert variant="destructive" className="mb-4">
+            <AlertTitle className="flex items-center">
+              <MapPin className="h-4 w-4 mr-2" /> Location Error
+            </AlertTitle>
+            <AlertDescription>{locationError}</AlertDescription>
+          </Alert>
+          <div className="flex flex-col gap-3">
+            <Button 
+              onClick={() => requestLocationPermission()}
+              className="bg-sahayata-blue hover:bg-sahayata-blue/80"
+            >
+              <Navigation className="h-4 w-4 mr-1" /> {t.grantPermission}
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={handleShowWithoutLocation}
+            >
+              {t.showWithoutLocation}
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {locationPermission === "denied" && !isLoading && !locationError && (
         <div className="text-center py-8">
           <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <Button onClick={() => {
@@ -231,7 +302,7 @@ export function NearbySupport({ language }: NearbySupportProps) {
         </div>
       )}
 
-      {locationPermission === "granted" && !isLoading && supportCenters.length > 0 && (
+      {(!isLoading && !locationError || locationPermission === "granted") && supportCenters.length > 0 && (
         <div className="space-y-4">
           {supportCenters.map((support, index) => (
             <Card key={index}>
