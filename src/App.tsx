@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import {  HashRouter, Routes, Route } from "react-router-dom";
 import { I18nProvider } from "@/lib/i18n/i18nContext";
 import Index from "./pages/Index";
 import SelfAssessment from "./pages/SelfAssessment";
@@ -31,7 +31,7 @@ const App = () => {
           <TooltipProvider>
             <Toaster />
             <Sonner />
-            <BrowserRouter>
+            <HashRouter>
               <Routes>
                 <Route path="/auth" element={<AuthPage />} />
                 <Route path="/" element={<Index />} />
@@ -47,7 +47,7 @@ const App = () => {
               </Routes>
               <EmergencyHelpButton />
               <MobileMenubar />
-            </BrowserRouter>
+            </HashRouter>
           </TooltipProvider>
         </I18nProvider>
       </UserProvider>
