@@ -99,10 +99,22 @@ export function NearbySupport({ language }: NearbySupportProps) {
   // Check for geolocation availability on component mount
   useEffect(() => {
     if ("geolocation" in navigator) {
-      // Show permission dialog if location permission is still pending
-      if (locationPermission === "pending") {
-        setShowPermissionDialog(true);
-      }
+      // Check if permission was already granted in a previous session
+      navigator.permissions?.query({ name: 'geolocation' })
+        .then((result) => {
+          if (result.state === 'granted') {
+            setLocationPermission('granted');
+            requestLocationUpdates();
+          } else if (result.state === 'prompt') {
+            setShowPermissionDialog(true);
+          } else {
+            setLocationPermission('denied');
+          }
+        })
+        .catch(() => {
+          // Fallback for browsers that don't support permissions API
+          setShowPermissionDialog(true);
+        });
     } else {
       setLocationPermission("denied");
     }
@@ -130,13 +142,12 @@ export function NearbySupport({ language }: NearbySupportProps) {
     }
   }, [userLocation, t, toast]);
 
-  const requestLocationPermission = () => {
+  const requestLocationUpdates = () => {
     setIsLoading(true);
-    setShowPermissionDialog(false);
     
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        console.log("Location permission granted:", position.coords);
+        console.log("Location retrieved:", position.coords);
         setLocationPermission("granted");
         setUserLocation({
           latitude: position.coords.latitude,
@@ -155,6 +166,12 @@ export function NearbySupport({ language }: NearbySupportProps) {
       },
       { timeout: 10000, enableHighAccuracy: true }
     );
+  };
+
+  const requestLocationPermission = () => {
+    setIsLoading(true);
+    setShowPermissionDialog(false);
+    requestLocationUpdates();
   };
 
   const handleCall = (phoneNumber: string) => {
