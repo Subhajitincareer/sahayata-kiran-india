@@ -1,73 +1,115 @@
-# Welcome to your Lovable project
 
-## Project info
+# Sahayata Kiran 🌟
 
-**URL**: https://lovable.dev/projects/dfd3047b-0871-483d-b5b9-d5ca2bb66057
+![Sahayata Kiran - Mental Health Platform](https://placekitten.com/800/200)
 
-## How can I edit this code?
+**Sahayata Kiran** ("Ray of Help" in Hindi) is a multilingual mental health platform built to provide accessible support resources, mood tracking, self-assessment tools, and crisis intervention.
 
-There are several ways of editing your application.
+## 🌈 Live Demo
 
-**Use Lovable**
+Visit [Sahayata Kiran](https://lovable.dev/projects/dfd3047b-0871-483d-b5b9-d5ca2bb66057) to see the application in action.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/dfd3047b-0871-483d-b5b9-d5ca2bb66057) and start prompting.
+## ✨ Features
 
-Changes made via Lovable will be committed automatically to this repo.
+- **Multilingual Support** 🌐 - Currently English and Hindi, easily extensible
+- **Mood Tracking Journal** 📝 - Track emotions and maintain a daily journal
+- **Mental Health Assessments** 🧠 - Self-assessment tools with recommendations
+- **Crisis Detection** 🚨 - Intelligent detection of crisis indicators in journal entries
+- **Emergency Resources** 🆘 - One-click access to crisis support
+- **Resource Library** 📚 - Educational content and support resources
 
-**Use your preferred IDE**
+## 🛠️ Tech Stack
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- **Frontend**: React + TypeScript + Vite
+- **UI Components**: Shadcn UI
+- **Styling**: Tailwind CSS
+- **State Management**: Tanstack Query + Context API
+- **Charts**: Recharts
+- **Database & Auth**: Supabase
+- **Icons**: Lucide React
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## 📚 Documentation
 
-Follow these steps:
+- [Complete Project Documentation](./DOCUMENTATION.md)
+- [Multilingual System Documentation](./MULTILINGUAL.md)
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## 🚀 Getting Started
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### Prerequisites
 
-# Step 3: Install the necessary dependencies.
-npm i
+- Node.js 18+ and npm
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/sahayata-kiran.git
+
+# Navigate to the project directory
+cd sahayata-kiran
+
+# Install dependencies
+npm install
+
+# Start the development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Visit `http://localhost:5173` to see the application running.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 📱 Screenshots
 
-**Use GitHub Codespaces**
+<div style="display: flex; flex-wrap: wrap; gap: 10px;">
+  <img src="https://placekitten.com/300/200" alt="Homepage" width="300"/>
+  <img src="https://placekitten.com/301/200" alt="Mood Tracker" width="300"/>
+  <img src="https://placekitten.com/302/200" alt="Resources" width="300"/>
+  <img src="https://placekitten.com/303/200" alt="Crisis Support" width="300"/>
+</div>
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## 🧩 Project Structure
 
-## What technologies are used for this project?
+```
+sahayata-kiran/
+├── public/             # Static files
+├── src/
+│   ├── components/     # Reusable UI components
+│   ├── hooks/          # Custom React hooks
+│   ├── lib/            # Utilities and services
+│   │   ├── i18n/       # Internationalization system
+│   │   └── ...
+│   ├── pages/          # Page components
+│   └── ...
+├── DOCUMENTATION.md    # Complete documentation
+├── MULTILINGUAL.md     # Multilingual system documentation
+└── README.md           # This file
+```
 
-This project is built with:
+## 🌐 Multilingual Support
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+Sahayata Kiran currently supports:
+- 🇺🇸 English
+- 🇮🇳 Hindi (हिन्दी)
 
-## How can I deploy this project?
+Adding a new language is straightforward - see [our guide](./MULTILINGUAL.md) for instructions.
 
-Simply open [Lovable](https://lovable.dev/projects/dfd3047b-0871-483d-b5b9-d5ca2bb66057) and click on Share -> Publish.
+## 🤝 Contributing
 
-## Can I connect a custom domain to my Lovable project?
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-Yes, you can!
+1. Fork the repository
+2. Create your feature branch: `git checkout -b feature/amazing-feature`
+3. Commit your changes: `git commit -m 'Add some amazing feature'`
+4. Push to the branch: `git push origin feature/amazing-feature`
+5. Open a Pull Request
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## 📄 License
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgements
+
+- [Shadcn UI](https://ui.shadcn.com/) for the beautiful UI components
+- [Tailwind CSS](https://tailwindcss.com/) for the utility-first CSS framework
+- [Vite](https://vitejs.dev/) for the lightning fast build tool
+- [Supabase](https://supabase.io/) for backend services
+- [React](https://reactjs.org/) for the frontend library
