@@ -1,11 +1,13 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MessageCircle, Heart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
 
 export function SupportForumSection() {
+  const navigate = useNavigate();
+
   return (
     <section className="py-16 bg-white">
       <div className="container">
@@ -111,7 +113,11 @@ export function SupportForumSection() {
               </ul>
             </div>
             <div className="md:w-1/3 flex justify-center md:justify-end">
-              <Button size="lg" className="bg-sahayata-blue hover:bg-sahayata-blue/80">
+              <Button
+                size="lg"
+                className="bg-sahayata-blue hover:bg-sahayata-blue/80"
+                onClick={() => navigate("/forum")}
+              >
                 Browse Forum
               </Button>
             </div>

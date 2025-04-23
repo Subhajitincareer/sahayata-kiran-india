@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -18,6 +17,8 @@ import { MobileMenubar } from "@/components/MobileMenubar";
 import { UserProvider } from "@/hooks/useUser";
 import AuthPage from "@/pages/Auth";
 import { useState } from "react";
+import Forum from "@/pages/Forum";
+import StoryDetail from "@/pages/StoryDetail";
 
 const App = () => {
   // Create a new QueryClient instance within the component to avoid SSR/hydration issues
@@ -40,6 +41,8 @@ const App = () => {
                 <Route path="/chat" element={<Chat />} />
                 <Route path="/mood-tracker" element={<MoodTracker />} />
                 <Route path="/resources" element={<Resources />} />
+                <Route path="/forum" element={<Forum />} />
+                <Route path="/story/:id" element={<StoryDetail />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
               <EmergencyHelpButton />

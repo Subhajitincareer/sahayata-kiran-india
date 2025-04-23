@@ -1,8 +1,8 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Quote } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export function SurvivorStoriesSection() {
   return (
@@ -43,7 +43,9 @@ export function SurvivorStoriesSection() {
               </div>
             </CardContent>
             <CardFooter className="bg-sahayata-softGray p-4">
-              <Button variant="link" className="text-sahayata-blue p-0 h-auto">Read full story</Button>
+              <Button variant="link" className="text-sahayata-blue p-0 h-auto" disabled>
+                Read full story
+              </Button>
             </CardFooter>
           </Card>
 
@@ -74,7 +76,11 @@ export function SurvivorStoriesSection() {
               </div>
             </CardContent>
             <CardFooter className="bg-sahayata-softGray p-4">
-              <Button variant="link" className="text-sahayata-blue p-0 h-auto">Read full story</Button>
+              <Link to="/story/social-anxiety">
+                <Button variant="link" className="text-sahayata-blue p-0 h-auto">
+                  Read full story
+                </Button>
+              </Link>
             </CardFooter>
           </Card>
 
@@ -105,7 +111,9 @@ export function SurvivorStoriesSection() {
               </div>
             </CardContent>
             <CardFooter className="bg-sahayata-softGray p-4">
-              <Button variant="link" className="text-sahayata-blue p-0 h-auto">Read full story</Button>
+              <Button variant="link" className="text-sahayata-blue p-0 h-auto" disabled>
+                Read full story
+              </Button>
             </CardFooter>
           </Card>
         </div>
@@ -115,7 +123,9 @@ export function SurvivorStoriesSection() {
             Every story represents a journey of courage and resilience. Your story matters too.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button variant="outline">Read More Stories</Button>
+            <Button variant="outline" asChild>
+              <Link to="/forum">Read More Stories</Link>
+            </Button>
             <Button className="bg-sahayata-blue hover:bg-sahayata-blue/80">Share Your Journey</Button>
           </div>
         </div>
