@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -12,6 +11,7 @@ import AssessmentDetail from "./pages/AssessmentDetail";
 import Chat from "./pages/Chat";
 import MoodTracker from "./pages/MoodTracker";
 import NotFound from "./pages/NotFound";
+import Resources from "./pages/Resources";
 import { EmergencyHelpButton } from "./components/EmergencyHelpButton";
 import { MobileMenubar } from "@/components/MobileMenubar";
 
@@ -31,6 +31,7 @@ const App = () => (
             <Route path="/all-assessments" element={<AllAssessments />} />
             <Route path="/chat" element={<Chat />} />
             <Route path="/mood-tracker" element={<MoodTracker />} />
+            <Route path="/resources" element={<Resources />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <EmergencyHelpButton />
