@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { MoodSelector } from "@/components/MoodSelector";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,6 +10,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { detectCrisis, getCrisisActions, getSupportiveMessage } from "@/lib/crisis-detection";
 import { useI18n } from "@/lib/i18n/i18nContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useUser } from "@/hooks/useUser";
 
 export type MoodEntry = {
   id: string;
@@ -24,59 +25,51 @@ export type MoodEntry = {
 
 export function MoodJournal() {
   const { t } = useI18n();
+  const { user } = useUser();
   const [mood, setMood] = useState<string | null>(null);
   const [journal, setJournal] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [todaysEntry, setTodaysEntry] = useState<MoodEntry | null>(null);
   const [crisisDetected, setCrisisDetected] = useState<"none" | "low" | "moderate" | "high">("none");
-  
+
   const today = new Date().toISOString().split('T')[0];
-  
-  // Check if user has already logged mood today
+
+  // Check if user has already logged mood today; fetch from Supabase
   useEffect(() => {
-    const entries = getFromLocalStorage("mood-entries") || [];
-    const existingEntry = entries.find((entry: MoodEntry) => entry.date === today);
-    if (existingEntry) {
-      setTodaysEntry(existingEntry);
-      setMood(existingEntry.mood);
-      setJournal(existingEntry.journal || "");
-      if (existingEntry.crisisLevel && existingEntry.crisisLevel !== "none") {
-        setCrisisDetected(existingEntry.crisisLevel);
-      }
-    }
-  }, [today]);
-  
-  // Autosave journal entry
-  useEffect(() => {
-    const autosaveTimer = setTimeout(() => {
-      if (mood && journal && journal.trim() !== "") {
-        saveJournalEntry();
-      }
-    }, 3000);
-    
-    return () => clearTimeout(autosaveTimer);
-  }, [journal, mood]);
-  
+    if (!user) return;
+    supabase
+      .from("mood_entries")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("date", today)
+      .maybeSingle()
+      .then(({ data, error }) => {
+        if (data) {
+          setTodaysEntry(data);
+          setMood(data.mood);
+          setJournal(data.journal || "");
+          if (data.crisis_level && data.crisis_level !== "none") {
+            setCrisisDetected(data.crisis_level);
+          }
+        }
+      });
+  }, [today, user]);
+
   // Crisis detection in journal text
   useEffect(() => {
     if (journal && journal.trim() !== "") {
       const { level } = detectCrisis(journal);
       setCrisisDetected(level);
-      
-      // Show supportive message for moderate and high crisis levels
+
       if (level === "moderate" || level === "high") {
         const supportiveMessage = getSupportiveMessage(level);
         if (supportiveMessage) {
-          // Fix: Using the correct toast format - toast(message) or toast.success/error/etc
           toast("We're here for you", {
             description: supportiveMessage,
             duration: 10000,
           });
         }
-        
-        // Automatically open emergency help panel for high crisis levels
         if (level === "high") {
-          // Simulate clicking the emergency help button
           const emergencyBtn = document.querySelector('[aria-label="Emergency Help"]') as HTMLButtonElement;
           if (emergencyBtn) {
             setTimeout(() => emergencyBtn.click(), 1000);
@@ -85,49 +78,61 @@ export function MoodJournal() {
       }
     }
   }, [journal]);
-  
-  const handleMoodSubmit = (selectedMood: string) => {
+
+  const handleMoodSubmit = async (selectedMood: string) => {
     setMood(selectedMood);
-    saveJournalEntry(selectedMood);
+    await saveJournalEntry(selectedMood);
   };
-  
-  const saveJournalEntry = (selectedMood?: string) => {
-    if (!mood && !selectedMood) return;
-    
+
+  const saveJournalEntry = async (selectedMood?: string) => {
+    if ((!mood && !selectedMood) || !user) return;
+
     setIsSubmitting(true);
-    
+
     try {
-      const entries = getFromLocalStorage("mood-entries") || [];
       const moodToSave = selectedMood || mood;
-      
-      // Check for crisis content
       const crisisResult = detectCrisis(journal);
-      
-      const newEntry: MoodEntry = {
-        id: todaysEntry?.id || crypto.randomUUID(),
+
+      const { data: existing } = await supabase
+        .from("mood_entries")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("date", today)
+        .maybeSingle();
+
+      const entryData = {
+        user_id: user.id,
         date: today,
         mood: moodToSave!,
-        journal: journal.trim() || undefined,
+        journal: journal.trim() || null,
         timestamp: Date.now(),
-        crisisLevel: crisisResult.level
+        crisis_level: crisisResult.level,
       };
-      
-      // Remove today's entry if it exists
-      const filteredEntries = entries.filter((entry: MoodEntry) => entry.date !== today);
-      
-      // Add the new entry
-      const updatedEntries = [newEntry, ...filteredEntries];
-      
-      // Save to localStorage
-      saveToLocalStorage("mood-entries", updatedEntries);
-      
-      setTodaysEntry(newEntry);
-      
-      if (!todaysEntry) {
+
+      let result;
+      if (existing) {
+        result = await supabase
+          .from("mood_entries")
+          .update(entryData)
+          .eq("id", existing.id)
+          .select()
+          .maybeSingle();
+      } else {
+        result = await supabase
+          .from("mood_entries")
+          .insert(entryData)
+          .select()
+          .maybeSingle();
+      }
+
+      setTodaysEntry(result.data || null);
+
+      if (!existing) {
         toast.success("Mood logged successfully!");
       } else {
         toast.success("Journal entry updated");
       }
+
     } catch (error) {
       console.error("Error saving mood entry:", error);
       toast.error("Failed to save your entry. Please try again.");
@@ -135,7 +140,7 @@ export function MoodJournal() {
       setIsSubmitting(false);
     }
   };
-  
+
   return (
     <div className="space-y-8">
       <Card>
@@ -147,7 +152,7 @@ export function MoodJournal() {
           <MoodSelector onSubmit={handleMoodSubmit} initialMood={mood || undefined} />
         </CardContent>
       </Card>
-      
+
       {mood && (
         <Card>
           <CardHeader>
@@ -164,7 +169,7 @@ export function MoodJournal() {
                 </AlertDescription>
               </Alert>
             )}
-            
+
             {crisisDetected === "low" && (
               <Alert className="mb-4">
                 <AlertCircle className="h-4 w-4" />
@@ -174,7 +179,7 @@ export function MoodJournal() {
                 </AlertDescription>
               </Alert>
             )}
-            
+
             <Textarea
               placeholder={t("mood.journal")}
               className="min-h-[200px]"
@@ -182,7 +187,7 @@ export function MoodJournal() {
               onChange={(e) => setJournal(e.target.value)}
             />
             <div className="mt-4 text-right">
-              <Button 
+              <Button
                 onClick={() => saveJournalEntry()}
                 disabled={isSubmitting}
               >

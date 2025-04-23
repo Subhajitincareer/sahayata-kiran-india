@@ -14,31 +14,36 @@ import NotFound from "./pages/NotFound";
 import Resources from "./pages/Resources";
 import { EmergencyHelpButton } from "./components/EmergencyHelpButton";
 import { MobileMenubar } from "@/components/MobileMenubar";
+import { UserProvider } from "@/hooks/useUser";
+import AuthPage from "@/pages/Auth";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <I18nProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/assessment" element={<SelfAssessment />} />
-            <Route path="/assessment/:id" element={<AssessmentDetail />} />
-            <Route path="/all-assessments" element={<AllAssessments />} />
-            <Route path="/chat" element={<Chat />} />
-            <Route path="/mood-tracker" element={<MoodTracker />} />
-            <Route path="/resources" element={<Resources />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          <EmergencyHelpButton />
-          <MobileMenubar />
-        </BrowserRouter>
-      </TooltipProvider>
-    </I18nProvider>
+    <UserProvider>
+      <I18nProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/auth" element={<AuthPage />} />
+              <Route path="/" element={<Index />} />
+              <Route path="/assessment" element={<SelfAssessment />} />
+              <Route path="/assessment/:id" element={<AssessmentDetail />} />
+              <Route path="/all-assessments" element={<AllAssessments />} />
+              <Route path="/chat" element={<Chat />} />
+              <Route path="/mood-tracker" element={<MoodTracker />} />
+              <Route path="/resources" element={<Resources />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+            <EmergencyHelpButton />
+            <MobileMenubar />
+          </BrowserRouter>
+        </TooltipProvider>
+      </I18nProvider>
+    </UserProvider>
   </QueryClientProvider>
 );
 

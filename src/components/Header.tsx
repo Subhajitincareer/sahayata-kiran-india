@@ -2,9 +2,11 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Phone, Heart, MessageCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "@/hooks/useUser";
 
 export function Header() {
   const navigate = useNavigate();
+  const { user, profile, signOut } = useUser();
 
   const handleHelplineClick = () => {
     navigate("/chat", { state: { mode: "helpline" } });
@@ -32,6 +34,25 @@ export function Header() {
           <Link to="/forum" className="text-sm font-medium hover:text-sahayata-blue">Forum</Link>
         </nav>
         <div className="flex items-center gap-2">
+          {user ? (
+            <>
+              <span className="hidden md:inline text-sm text-muted-foreground">
+                {profile?.name ? `Hi, ${profile.name}` : user.email}
+              </span>
+              <Button size="sm" variant="outline" onClick={signOut}>
+                Sign Out
+              </Button>
+            </>
+          ) : (
+            <Button
+              size="sm"
+              className="bg-sahayata-blue hover:bg-sahayata-blue/80"
+              onClick={() => navigate("/auth")}
+              aria-label="Sign In"
+            >
+              Sign In
+            </Button>
+          )}
           <Button 
             variant="outline" 
             size="sm" 

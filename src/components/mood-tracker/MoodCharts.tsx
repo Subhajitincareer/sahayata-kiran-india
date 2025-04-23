@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,17 +5,19 @@ import { MoodEntry } from "./MoodJournal";
 import { getFromLocalStorage } from "@/lib/storage";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, Tooltip, PieChart, Pie } from "recharts";
+import { supabase } from "@/integrations/supabase/client";
+import { useUser } from "@/hooks/useUser";
+import { ChartLine } from "lucide-react";
 
-// Mood colors for charting
 const MOOD_COLORS = {
-  "Happy": "#4ade80", // green-400
-  "Calm": "#60a5fa", // blue-400
-  "Sad": "#818cf8", // indigo-400
-  "Stressed": "#facc15", // yellow-400
-  "Anxious": "#fb923c", // orange-400
-  "Angry": "#f87171", // red-400
-  "Depressed": "#a78bfa", // purple-400
-  "Confused": "#9ca3af", // gray-400
+  "Happy": "#4ade80",
+  "Calm": "#60a5fa",
+  "Sad": "#818cf8",
+  "Stressed": "#facc15",
+  "Anxious": "#fb923c",
+  "Angry": "#f87171",
+  "Depressed": "#a78bfa",
+  "Confused": "#9ca3af",
 };
 
 type TimeRange = "week" | "month" | "year";
@@ -24,12 +25,21 @@ type TimeRange = "week" | "month" | "year";
 export function MoodCharts() {
   const [timeRange, setTimeRange] = useState<TimeRange>("week");
   const [entries, setEntries] = useState<MoodEntry[]>([]);
-  
+  const { user } = useUser();
+
   useEffect(() => {
-    const storedEntries = getFromLocalStorage("mood-entries") || [];
-    setEntries(storedEntries);
-  }, []);
-  
+    if (!user) {
+      setEntries([]);
+      return;
+    }
+    supabase
+      .from("mood_entries")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("timestamp", { ascending: false })
+      .then(({ data }) => setEntries(data || []));
+  }, [user]);
+
   const filteredEntries = useMemo(() => {
     const now = new Date();
     let cutoffDate = new Date();
@@ -48,7 +58,6 @@ export function MoodCharts() {
   const chartData = useMemo(() => {
     if (!filteredEntries.length) return [];
     
-    // For daily view in the last week
     if (timeRange === "week") {
       const last7Days = Array(7).fill(0).map((_, i) => {
         const date = new Date();
@@ -66,19 +75,16 @@ export function MoodCharts() {
       });
     }
     
-    // For monthly or yearly, aggregate by week or month
     const groupedData: Record<string, { count: number, moodSum: number, moods: Record<string, number> }> = {};
     
     filteredEntries.forEach(entry => {
       let key;
       if (timeRange === "month") {
-        // Group by week of month
         const date = new Date(entry.timestamp);
         const weekStart = new Date(date);
         weekStart.setDate(date.getDate() - date.getDay());
         key = weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
       } else {
-        // Group by month of year
         key = new Date(entry.timestamp).toLocaleDateString('en-US', { month: 'short' });
       }
       
@@ -100,7 +106,6 @@ export function MoodCharts() {
       moodValue: value.moodSum / value.count,
       moods: value.moods
     }));
-    
   }, [filteredEntries, timeRange]);
   
   const moodFrequency = useMemo(() => {
@@ -133,8 +138,6 @@ export function MoodCharts() {
   }, [moodFrequency, filteredEntries]);
   
   function getMoodValue(mood: string): number {
-    // Convert mood to a numerical value for charting
-    // Happy: 5, Calm: 4, Neutral: 3, Sad: 2, Angry/Anxious: 1
     const moodValues: Record<string, number> = {
       "Happy": 5,
       "Calm": 4,
@@ -149,7 +152,6 @@ export function MoodCharts() {
     return moodValues[mood] || 3;
   }
   
-  // If no entries, show empty state
   if (!entries.length) {
     return (
       <Card className="border-dashed">
@@ -310,6 +312,3 @@ export function MoodCharts() {
     </div>
   );
 }
-
-// Import the ChartLine icon
-import { ChartLine } from "lucide-react";

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -7,8 +6,34 @@ import { MoodCharts } from "@/components/mood-tracker/MoodCharts";
 import { MoodReminder } from "@/components/mood-tracker/MoodReminder";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar, ChartLine, BookText } from "lucide-react";
+import { useUser } from "@/hooks/useUser";
+import { useNavigate } from "react-router-dom";
 
 export default function MoodTracker() {
+  const { user, loading } = useUser();
+  const navigate = useNavigate();
+
+  if (loading) {
+    return <div className="flex h-screen items-center justify-center">Loading...</div>;
+  }
+
+  if (!user) {
+    setTimeout(() => navigate("/auth", { state: { redirect: "/mood-tracker" } }), 500);
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="p-8 bg-white rounded-lg shadow text-center">
+          <h2 className="text-xl font-bold mb-2">Sign in required</h2>
+          <p className="text-muted-foreground mb-4">
+            Please sign in to access the mood tracker.
+          </p>
+          <Button onClick={() => navigate("/auth", { state: { redirect: "/mood-tracker" } })}>
+            Sign In
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
@@ -17,9 +42,8 @@ export default function MoodTracker() {
           <h1 className="text-3xl font-bold mb-6 text-center">Mood Tracker</h1>
           <p className="text-muted-foreground mb-8 text-center max-w-2xl mx-auto">
             Track your daily emotions, write journal entries, and gain insights into your emotional patterns.
-            All data is stored locally on your device for complete privacy.
+            Your data is stored securely and only accessible to you.
           </p>
-
           <Tabs defaultValue="journal" className="w-full">
             <TabsList className="grid w-full grid-cols-3 mb-8">
               <TabsTrigger value="journal" className="flex items-center gap-2">
@@ -51,7 +75,6 @@ export default function MoodTracker() {
               </div>
             </TabsContent>
           </Tabs>
-          
           <MoodReminder />
         </div>
       </main>
